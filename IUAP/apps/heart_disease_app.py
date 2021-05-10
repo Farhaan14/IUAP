@@ -30,9 +30,16 @@ c = conn.cursor()
 def create_usertable():
 	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
 
+def create_userhealth():
+	c.execute('CREATE TABLE IF NOT EXISTS usershealth(username TEXT,age integer,sex text,chest_pain text,rest_bp real,serum_cl real,fast_bs integer,rest_ecg text,max_hr integer,st_dep real,ex_ag text,slope text,ves_nm integer,tha text)')
+
 
 def add_userdata(username,password):
 	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+	conn.commit()
+	
+def add_userhealth_data(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha):
+	c.execute('INSERT INTO usershealth (username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ',(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha))
 	conn.commit()
 
 def login_user(username,password):
@@ -129,6 +136,7 @@ def main():
 		if st.sidebar.checkbox("Login"):
 			# if password == '12345':
 			create_usertable()
+			
 			hashed_pswd = make_hashes(password)
 
 			result = login_user(username,check_hashes(password,hashed_pswd))
@@ -152,8 +160,11 @@ def main():
 					slope = st.selectbox("Slope of the Peak Exercise ST Segment",("unsloping","flat","downsloping"))
 					ves_nm = st.selectbox("Number of Vessels Colored by Flourosopy",(0,1,2,3))
 					tha = st.selectbox("Thalassemia",("fixed defect","normal","reversable defect"))
+					
 					if st.button("Predict"):
-						predict(age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha)
+						predict(age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha)	
+						create_userhealth()					
+						add_userhealth_data(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha)
 
 				elif task == "Analytics":
 					st.subheader("Analytics")
