@@ -209,14 +209,22 @@ def main():
 						#st.line_chart(select_user2[["age","serum_cl"]])
 						x=select_user[["age"]]
 						y=select_user[["serum_cl"]]
-						p.line(x, y, legend_label='Trend', line_width=2)
-						st.bokeh_chart(p, use_container_width=True)
+						fig = plt.figure()
+						ax = fig.add_subplot(1,1,1)
+						ax.plot(x,y)
+						ax.set_xlabel("Age")
+						ax.set_ylabel("Serum Cholesterol")
+						st.write(fig)
 					else:
 						#st.line_chart(select_user2[["age","max_hr"]])
 						x=select_user[["age"]]
 						y=select_user[["max_hr"]]
-						p.line(x, y, legend_label='Trend', line_width=2)
-						st.bokeh_chart(p, use_container_width=True)
+						fig = plt.figure()
+						ax = fig.add_subplot(1,1,1)
+						ax.plot(x,y)
+						ax.set_xlabel("Age")
+						ax.set_ylabel("Maximum Heart Rate")
+						st.write(fig)
 					
 					
 			else:
