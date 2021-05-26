@@ -78,11 +78,11 @@ def predict(Glucose, Insulin, BMI, Age):
     if output == 0:
         st.text("The patient is not likely to have diabetes!")
     else:
-        st.text("The patient is likely to have diabetes! Mail sent.")
+        st.text("The patient is likely to have diabetes! Emergency Contacts have been notified.")
         sender = "iupacwecare@gmail.com"
         receiver = current_email
         password= "iupac@123"
-        message = "The patient is likely to have diabetes!"
+        message = "The patient is likely to have diabetes. Please reach out to them immediately."
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
         server.login(sender,password)

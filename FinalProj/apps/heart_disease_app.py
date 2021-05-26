@@ -134,7 +134,7 @@ def predict(age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,e
         sender = "iupacwecare@gmail.com"
         receiver = current_email
         password= "iupac@123"
-        message = "The patient is likely to have heart disease!"
+        message = "The patient is likely to have heart disease! Please reach out to them immediately."
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
         server.login(sender,password)
