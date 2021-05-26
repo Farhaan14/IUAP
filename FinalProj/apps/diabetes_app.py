@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import smtplib
 
+current_email = ""
+
 # Security
 #passlib,hashlib,bcrypt,scrypt
 import hashlib
@@ -23,12 +25,12 @@ conn = sqlite3.connect('didata.db',check_same_thread=False)
 c = conn.cursor()
 # DB  Functions
 def create_usertable():
-	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT,email TEXT)')
 def create_userhealth():
 	c.execute('CREATE TABLE IF NOT EXISTS usershealth(username TEXT,age integer,bmi real,glucose real,insulin real)')
 
-def add_userdata(username,password):
-	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+def add_userdata(username,password,email):
+	c.execute('INSERT INTO userstable(username,password,email) VALUES (?,?,?)',(username,password,email))
 	conn.commit()
 def add_userhealth_data(username,age,bmi,glucose,insulin):
 	c.execute('INSERT INTO usershealth(username,age,bmi,glucose,insulin) VALUES (?,?,?,?,?)',(username,age,bmi,glucose,insulin))
@@ -36,6 +38,11 @@ def add_userhealth_data(username,age,bmi,glucose,insulin):
 
 def login_user(username,password):
 	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
+
+def getEmail(username,password):
+	c.execute('SELECT email FROM userstable WHERE username =? AND password = ?',(username,password))
 	data = c.fetchall()
 	return data
 
@@ -71,11 +78,11 @@ def predict(Glucose, Insulin, BMI, Age):
     if output == 0:
         st.text("The patient is not likely to have diabetes!")
     else:
-        st.text("The patient is likely to have diabetes!")
+        st.text("The patient is likely to have diabetes! Mail sent.")
         sender = "iupacwecare@gmail.com"
-        receiver = "iupacwecare@gmail.com"
+        receiver = current_email
         password= "iupac@123"
-        message = "Please rush to your friend's aid asap"
+        message = "The patient is likely to have diabetes!"
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
         server.login(sender,password)
@@ -105,7 +112,11 @@ def main():
 
 				st.success("Logged In as {}".format(username))
 
-				task = st.selectbox("Task",["Check for Diabetes","Analytics","Profiles"])
+				data1 = getEmail(username,check_hashes(password,hashed_pswd))
+				global current_email
+				current_email = data1[0][0]
+
+				task = st.selectbox("Task",["Check for Diabetes","Profiles"])
 				if task == "Check for Diabetes":
 					st.subheader("Check for Diabetes")
 					glucose = st.number_input('Glucose')
@@ -117,8 +128,6 @@ def main():
 						create_userhealth()					
 						add_userhealth_data(username,age,bmi,glucose,insulin)
 						
-				elif task == "Analytics":
-					st.subheader("Analytics")
 				elif task == "Profiles":
 					st.subheader("User Profiles")
 					user_result = view_all_users(username)
@@ -147,24 +156,33 @@ def main():
 						#st.line_chart(select_user2[["age","glucose"]])
 						x=select_user[["age"]]
 						y=select_user[["glucose"]]
-						p.line(x, y, legend_label='Trend', line_width=2)
-						st.bokeh_chart(p, use_container_width=True)
+						fig = plt.figure()
+						ax = fig.add_subplot(1,1,1)
+						ax.plot(x,y)
+						ax.set_xlabel("Age")
+						ax.set_ylabel("Glucose")
+						st.write(fig)
 					else:
 						#st.line_chart(select_user2[["age","insulin"]])
 						x=select_user[["age"]]
 						y=select_user[["insulin"]]
-						p.line(x, y, legend_label='Trend', line_width=2)
-						st.bokeh_chart(p, use_container_width=True)
+						fig = plt.figure()
+						ax = fig.add_subplot(1,1,1)
+						ax.plot(x,y)
+						ax.set_xlabel("Age")
+						ax.set_ylabel("Insulin")
+						st.write(fig)
 					
 			else:
 				st.warning("Incorrect Username/Password")
 	elif choice == "SignUp":
 		st.subheader("Create New Account")
 		new_user = st.text_input("Username")
+		new_email = st.text_input("Email")
 		new_password = st.text_input("Password",type='password')
 		if st.button("Signup"):
 			create_usertable()
-			add_userdata(new_user,make_hashes(new_password))
+			add_userdata(new_user,make_hashes(new_password),new_email)
 			st.success("You have successfully created a valid Account")
 			st.info("Go to Login Menu to login")
 

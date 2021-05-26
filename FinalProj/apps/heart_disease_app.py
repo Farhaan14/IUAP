@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import smtplib
 
+current_email = ""
 
 # Security
 #passlib,hashlib,bcrypt,scrypt
@@ -33,14 +34,14 @@ conn = sqlite3.connect('data.db',check_same_thread=False)
 c = conn.cursor()
 # DB  Functions
 def create_usertable():
-	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT)')
+	c.execute('CREATE TABLE IF NOT EXISTS userstable(username TEXT,password TEXT, email TEXT)')
 
 def create_userhealth():
 	c.execute('CREATE TABLE IF NOT EXISTS usershealth(username TEXT,age integer,sex text,chest_pain text,rest_bp real,serum_cl real,fast_bs integer,rest_ecg text,max_hr integer,st_dep real,ex_ag text,slope text,ves_nm integer,tha text)')
 
 
-def add_userdata(username,password):
-	c.execute('INSERT INTO userstable(username,password) VALUES (?,?)',(username,password))
+def add_userdata(username,password,email):
+	c.execute('INSERT INTO userstable(username,password,email) VALUES (?,?,?)',(username,password,email))
 	conn.commit()
 	
 def add_userhealth_data(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha):
@@ -49,6 +50,11 @@ def add_userhealth_data(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,res
 
 def login_user(username,password):
 	c.execute('SELECT * FROM userstable WHERE username =? AND password = ?',(username,password))
+	data = c.fetchall()
+	return data
+
+def getEmail(username,password):
+	c.execute('SELECT email FROM userstable WHERE username =? AND password = ?',(username,password))
 	data = c.fetchall()
 	return data
 
@@ -123,15 +129,17 @@ def predict(age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,e
     if output == 1:
         st.text("The patient is not likely to have heart disease!")
     else:
-        st.text("The patient is likely to have heart disease!")
+        st.text("The patient is likely to have heart disease! Emergency Contacts have been notified!")
+		
         sender = "iupacwecare@gmail.com"
-        receiver = "iupacwecare@gmail.com"
+        receiver = current_email
         password= "iupac@123"
-        message = "Please rush to your friend's aid asap"
+        message = "The patient is likely to have heart disease!"
         server = smtplib.SMTP('smtp.gmail.com',587)
         server.starttls()
         server.login(sender,password)
         server.sendmail(sender,receiver,message)
+
 def main():
 
 	menu = ["Heart","Login","SignUp"]
@@ -156,8 +164,11 @@ def main():
 			if result:
 
 				st.success("Logged In as {}".format(username))
+				data1 = getEmail(username,check_hashes(password,hashed_pswd))
+				global current_email
+				current_email = data1[0][0]
 
-				task = st.selectbox("Task",["Check Heart","Analytics","Profiles"])
+				task = st.selectbox("Task",["Check Heart","Profiles"])
 				if task == "Check Heart":
 					st.subheader("Check Heart")
 					age = st.number_input('Age')
@@ -179,8 +190,6 @@ def main():
 						create_userhealth()					
 						add_userhealth_data(username,age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,ex_ag,slope,ves_nm,tha)
 
-				elif task == "Analytics":
-					st.subheader("Analytics")
 				elif task == "Profiles":
 					st.subheader("User Profiles")
 					user_result = view_all_users(username)
@@ -237,11 +246,13 @@ def main():
 	elif choice == "SignUp":
 		st.subheader("Create New Account")
 		new_user = st.text_input("Username")
+		new_email = st.text_input("Email")
 		new_password = st.text_input("Password",type='password')
+
 
 		if st.button("Signup"):
 			create_usertable()
-			add_userdata(new_user,make_hashes(new_password))
+			add_userdata(new_user,make_hashes(new_password),new_email)
 			st.success("You have successfully created a valid Account")
 			st.info("Go to Login Menu to login")
 
