@@ -15,6 +15,7 @@ from email.mime.multipart import MIMEMultipart
 
 
 current_email = ""
+current_user = ""
 
 
 # Security
@@ -312,7 +313,7 @@ def predict(Glucose, Insulin, BMI, Age):
         <div style="line-height: 140%; text-align: left; word-wrap: break-word;">
             <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">Hello,</span></p>
         <p style="font-size: 14px; line-height: 140%;">&nbsp;</p>
-        <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">The patient is likely to have Diabetes.</span></p>
+        <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;"><strong>""" + current_user + """</strong> is likely to have Diabetes.</span></p>
         <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">Kindly reach out to them immediately.</span></p>
         <p style="font-size: 14px; line-height: 140%;">&nbsp;</p>
         </div>
@@ -473,6 +474,8 @@ def main():
                 data1 = getEmail(username, check_hashes(password, hashed_pswd))
                 global current_email
                 current_email = data1[0][0]
+                global current_user
+                current_user = username
 
                 task = st.selectbox("Task", ["Check for Diabetes", "Profiles"])
                 if task == "Check for Diabetes":

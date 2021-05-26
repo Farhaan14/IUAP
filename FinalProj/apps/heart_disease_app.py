@@ -20,6 +20,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 current_email = ""
+current_user = ""
 
 # Security
 #passlib,hashlib,bcrypt,scrypt
@@ -345,7 +346,7 @@ def predict(age,sex,chest_pain,rest_bp,serum_cl,fast_bs,rest_ecg,max_hr,st_dep,e
         <div style="line-height: 140%; text-align: left; word-wrap: break-word;">
             <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">Hello,</span></p>
         <p style="font-size: 14px; line-height: 140%;">&nbsp;</p>
-        <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">The patient is likely to have Heart Disease.</span></p>
+        <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;"><strong>""" + current_user + """</strong> is likely to have Heart Disease.</span></p>
         <p style="font-size: 14px; line-height: 140%;"><span style="font-size: 18px; line-height: 25.2px; color: #666666;">Kindly reach out to them immediately.</span></p>
         <p style="font-size: 14px; line-height: 140%;">&nbsp;</p>
         </div>
@@ -505,6 +506,8 @@ def main():
                 data1 = getEmail(username, check_hashes(password, hashed_pswd))
                 global current_email
                 current_email = data1[0][0]
+                global current_user
+                current_user = username
 
                 task = st.selectbox("Task", ["Check Heart", "Profiles"])
                 if task == "Check Heart":
