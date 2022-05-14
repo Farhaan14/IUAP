@@ -1,3 +1,3 @@
 # IUAP - Intelligent User Ailment Predictor
 
-### test ... final proj
+### Heart disease and Diabetes Predictor using Streamlit library
